@@ -1,16 +1,21 @@
 import { fs, parse } from "./deps.ts";
 import { error, genHeader, success, warn } from "./util.ts";
 
-type Args = { _: Array<string | number>; "input-dir": string; "o": string };
+type Args = { "input-dir": string; "output-dir": string };
 
+/*
+    regular cast not possible because of the
+    presence of the '_' property, but we
+    don't care about it in this case
+*/
 const args = parse(Deno.args, {
   string: ["input-dir", "o"],
-  default: { "input-dir": ".", "o": "." },
-}) as Args;
+  default: { "input-dir": ".", "output-dir": "." },
+}) as unknown as Args;
 
-const dirs = ["input-dir", "o"] as Partial<keyof Args>[];
+const dirs = ["input-dir", "output-dir"] as (keyof Args)[];
 dirs.forEach(async (k) => {
-  const stat = await Deno.stat(args[k] as string);
+  const stat = await Deno.stat(args[k]);
   if (!stat.isDirectory) {
     error(`directory '${args[k]}' does not exist`);
   }
@@ -40,7 +45,7 @@ for await (const file of Deno.readDir(args["input-dir"])) {
   }
 }
 
-const enumDir = `${await Deno.realPath(args.o)}/enums`;
+const enumDir = `${await Deno.realPath(args["output-dir"])}/enums`;
 await fs.ensureDir(enumDir);
 
 for (const [k, v] of Object.entries(enums)) {
