@@ -93,7 +93,7 @@ for (const [k, v] of Object.entries(enums)) {
   const file = `${enumDir}/${k}.ts`;
   await Deno.writeTextFile(
     file,
-    `${genHeader}${v.join("\n\n")}`,
+    `${genHeader}${v.join("\n\n")}\n`,
   );
 
   success(`Wrote ${file}`);
