@@ -24,26 +24,43 @@ dirs.forEach(async (k) => {
 const enumRegex = /enum\s\w+\s{.+?}/gs;
 const enums: Record<string, string[]> = {};
 
-for await (const file of Deno.readDir(args["input-dir"])) {
-  if (!file.isFile || !file.name.endsWith(".sol")) {
-    warn(`'${file.name}' is not a Solidity file`);
-    continue;
-  }
+const generate = async (dir: string) => {
+  for await (const file of Deno.readDir(dir)) {
+    if (file.isDirectory) {
+      await generate(`${dir}/${file.name}`);
+      continue;
+    }
 
-  const content = await Deno.readTextFile(`${args["input-dir"]}/${file.name}`);
-  const matches = Array.from(
-    content.matchAll(enumRegex),
-    (x) => `const ${x[0]}`,
-  );
+    if (!file.isFile || !file.name.endsWith(".sol")) {
+      warn(`'${file.name}' is not a Solidity file`);
+      continue;
+    }
 
-  if (matches.length != 0) {
-    const filename = file.name.replace(".sol", "");
-    enums[filename] = matches;
-    success(`'${file.name}' contains ${matches.length} enum(s)`);
-  } else {
-    warn(`'${file.name}' contains no enums`);
+    const content = await Deno.readTextFile(
+      `${dir}/${file.name}`,
+    );
+
+    const matches = Array.from(
+      content.matchAll(enumRegex),
+      (x) => `const ${x[0]}`,
+    );
+
+    if (matches.length != 0) {
+      const filename = file.name.replace(".sol", "");
+      if (enums[filename] != undefined) {
+        error(
+          "Unable to process multiple contracts with the same filename within the same input-dir",
+        );
+      }
+      enums[filename] = matches;
+      success(`'${dir}/${file.name}' contains ${matches.length} enum(s)`);
+    } else {
+      warn(`'${dir}/${file.name}' contains no enums`);
+    }
   }
-}
+};
+
+await generate(args["input-dir"]);
 
 const enumDir = `${await Deno.realPath(args["output-dir"])}/enums`;
 await fs.ensureDir(enumDir);
