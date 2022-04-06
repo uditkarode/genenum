@@ -1,0 +1,4 @@
+enum ZZHZH {
+  AAOA,
+  GPAJ
+}
