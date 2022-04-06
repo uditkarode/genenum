@@ -9,7 +9,7 @@ type Args = { "input-dir": string; "output-dir": string };
     don't care about it in this case
 */
 const args = parse(Deno.args, {
-  string: ["input-dir", "o"],
+  string: ["input-dir", "output-dir"],
   default: { "input-dir": ".", "output-dir": "." },
 }) as unknown as Args;
 
