@@ -38,7 +38,7 @@ const enums: Record<string, string[]> = {};
  */
 const generate = async (dir: string) => {
   for await (const file of Deno.readDir(dir)) {
-    if (file.isDirectory) {
+    if (file.isDirectory && !file.name.startsWith(".")) {
       await generate(`${dir}/${file.name}`);
       continue;
     }
