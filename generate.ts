@@ -53,7 +53,7 @@ const generate = async (dir: string) => {
       `${dir}/${file.name}`,
     );
 
-    // find enum regex matches the source
+    // find enums in the source
     const matches = Array.from(
       content.matchAll(enumRegex),
       (x) => `export const ${x[0]}`,
