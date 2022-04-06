@@ -56,7 +56,7 @@ const generate = async (dir: string) => {
     // find enum regex matches the source
     const matches = Array.from(
       content.matchAll(enumRegex),
-      (x) => `const ${x[0]}`,
+      (x) => `export const ${x[0]}`,
     );
 
     if (matches.length != 0) {
