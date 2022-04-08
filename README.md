@@ -1,8 +1,8 @@
 # GenEnum
 
-`genenum` is a very simple tool that scans your solidity project directory and
+`genenum` is a very simple tool that scans your Solidity project directory and
 extracts the enums into TypeScript files. Since TypeChain does not have this
-functionality at this moment, this tool might save you the trouble of keeping
+functionality at the moment, genenum might save you the trouble of keeping
 enums in sync manually.
 
 ![example](example.jpg)
