@@ -1,9 +1,11 @@
 enum ThirdTest {
-  Text,
-  WhatDoIPutHere
+    // some comment
+    Text,
+    // more comments
+    WhatDoIPutHere
 }
 
 enum Xyz {
-  ThisIsKindaBoring,
-  LongLineOfText
+    ThisIsKindaBoring,
+    LongLineOfText
 }

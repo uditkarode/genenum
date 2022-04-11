@@ -54,7 +54,11 @@ const generate = async (dir: string) => {
     // find enums in the source
     const matches = Array.from(content.matchAll(enumRegex), (x) => {
       const name = x[1];
-      const members = x[2].replaceAll(" ", "").replaceAll("\n", "").split(",");
+      const members = x[2]
+        .replaceAll(/\s\/\/.*?$/gm, "")
+        .replaceAll(" ", "")
+        .replaceAll("\n", "")
+        .split(",");
 
       const code = `
 enum ${name}Enum { ${members} }
