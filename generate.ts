@@ -61,12 +61,14 @@ const generate = async (dir: string) => {
       const members = x[2].replaceAll(" ", "").replaceAll("\n", "").split(",");
 
       const code = `
-// ${name}
-export const ${x[0]}
+export const ${name} = (() => {
+  enum e { ${members} }
 
-export const ${name}List = [${members.map((x) => `"${x}"`)}] as const;
-export const indexIn${name} = (val: string) => ${name}List.findIndex(x => x === val);
-      `;
+  const list = [${members.map((x) => `"${x}"`)}] as const;
+  const indexOf = (val: string) => list.findIndex(x => x === val);
+
+  return { enum: e, list, indexOf };
+})();`;
 
       return code;
     });
