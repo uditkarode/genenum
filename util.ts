@@ -11,7 +11,7 @@ const log = (
   header: string,
   msg: string,
   transform: (v: string) => string,
-  exitCode: number,
+  exitCode: number
 ) => {
   console.log(transform(`${c.bold(header)} ${msg}`));
   exitCode >= 0 && Deno.exit(exitCode);

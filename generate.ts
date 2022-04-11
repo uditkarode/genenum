@@ -1,5 +1,9 @@
 import { fs, parse } from "./deps.ts";
 import { error, genHeader, success, warn } from "./util.ts";
+import {
+  prettier,
+  prettierPlugins,
+} from "https://denolib.com/denolib/prettier/prettier.ts";
 
 type Args = { "input-dir": string; "output-dir": string };
 
@@ -23,7 +27,7 @@ dirs.forEach(async (k) => {
 });
 
 /// regex to extract enums
-const enumRegex = /enum\s\w+\s{.+?}/gs;
+const enumRegex = /enum\s(\w+)\s{(.+?)}/gs;
 
 /// object that will contain all enums
 /// Record<filename, array of enum strings>
@@ -49,14 +53,30 @@ const generate = async (dir: string) => {
     }
 
     // read the solidity source
-    const content = await Deno.readTextFile(
-      `${dir}/${file.name}`,
-    );
+    const content = await Deno.readTextFile(`${dir}/${file.name}`);
 
     // find enums in the source
-    const matches = Array.from(
-      content.matchAll(enumRegex),
-      (x) => `export const ${x[0]}`,
+    const matches = await Promise.all(
+      Array.from(content.matchAll(enumRegex), (x) => {
+        const name = x[1];
+        const members = x[2]
+          .replaceAll(" ", "")
+          .replaceAll("\n", "")
+          .split(",");
+
+        const code = `
+          // ${name}
+          export const ${x[0]}
+          export const ${name}List = [${members.map((x) => `"${x}"`)}];
+          export const indexIn${name} = (val: string) => ${name}List.findIndex(x => x === val);
+      `;
+
+        console.log(code);
+        return prettier.format(code, {
+          parser: "babel",
+          plugins: prettierPlugins,
+        }) as Promise<string>;
+      })
     );
 
     if (matches.length != 0) {
@@ -64,7 +84,7 @@ const generate = async (dir: string) => {
       const filename = file.name.replace(".sol", "");
       if (enums[filename] != undefined) {
         error(
-          "Unable to process multiple contracts with the same filename within the same input-dir",
+          "Unable to process multiple contracts with the same filename within the same input-dir"
         );
       }
       enums[filename] = matches;
@@ -91,10 +111,7 @@ await fs.ensureDir(enumDir);
  */
 for (const [k, v] of Object.entries(enums)) {
   const file = `${enumDir}/${k}.ts`;
-  await Deno.writeTextFile(
-    file,
-    `${genHeader}${v.join("\n\n")}\n`,
-  );
+  await Deno.writeTextFile(file, `${genHeader}${v.join("\n\n")}\n`);
 
   success(`Wrote ${file}`);
 }
