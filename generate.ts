@@ -1,9 +1,5 @@
 import { fs, parse } from "./deps.ts";
 import { error, genHeader, success, warn } from "./util.ts";
-import {
-  prettier,
-  prettierPlugins,
-} from "https://denolib.com/denolib/prettier/prettier.ts";
 
 type Args = { "input-dir": string; "output-dir": string };
 
@@ -61,13 +57,13 @@ const generate = async (dir: string) => {
       const members = x[2].replaceAll(" ", "").replaceAll("\n", "").split(",");
 
       const code = `
-export const ${name} = (() => {
-  enum e { ${members} }
+enum ${name}Enum { ${members} }
 
+export const ${name} = (() => {
   const list = [${members.map((x) => `"${x}"`)}] as const;
   const indexOf = (val: string) => list.findIndex(x => x === val);
 
-  return { enum: e, list, indexOf };
+  return { enum: ${name}Enum, list, indexOf };
 })();`;
 
       return code;
