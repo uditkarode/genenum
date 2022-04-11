@@ -56,28 +56,20 @@ const generate = async (dir: string) => {
     const content = await Deno.readTextFile(`${dir}/${file.name}`);
 
     // find enums in the source
-    const matches = await Promise.all(
-      Array.from(content.matchAll(enumRegex), (x) => {
-        const name = x[1];
-        const members = x[2]
-          .replaceAll(" ", "")
-          .replaceAll("\n", "")
-          .split(",");
+    const matches = Array.from(content.matchAll(enumRegex), (x) => {
+      const name = x[1];
+      const members = x[2].replaceAll(" ", "").replaceAll("\n", "").split(",");
 
-        const code = `
-          // ${name}
-          export const ${x[0]}
-          export const ${name}List = [${members.map((x) => `"${x}"`)}];
-          export const indexIn${name} = (val: string) => ${name}List.findIndex(x => x === val);
+      const code = `
+// ${name}
+export const ${x[0]}
+
+export const ${name}List = [${members.map((x) => `"${x}"`)}];
+export const indexIn${name} = (val: string) => ${name}List.findIndex(x => x === val);
       `;
 
-        console.log(code);
-        return prettier.format(code, {
-          parser: "babel",
-          plugins: prettierPlugins,
-        }) as Promise<string>;
-      })
-    );
+      return code;
+    });
 
     if (matches.length != 0) {
       // if matches exist, add to `enums`
