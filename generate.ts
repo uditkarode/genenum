@@ -64,7 +64,7 @@ const generate = async (dir: string) => {
 // ${name}
 export const ${x[0]}
 
-export const ${name}List = [${members.map((x) => `"${x}"`)}];
+export const ${name}List = [${members.map((x) => `"${x}"`)}] as const;
 export const indexIn${name} = (val: string) => ${name}List.findIndex(x => x === val);
       `;
 
