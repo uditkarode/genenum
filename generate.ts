@@ -1,5 +1,5 @@
 import { fs, parse } from "./deps.ts";
-import { error, genHeader, success, warn } from "./util.ts";
+import { error, genHeader, success, warn, info } from "./util.ts";
 
 type Args = { "input-dir": string; "output-dir": string };
 
@@ -60,15 +60,10 @@ const generate = async (dir: string) => {
         .replaceAll("\n", "")
         .split(",");
 
-      const code = `
-enum ${name}Enum { ${members} }
-
-export const ${name} = (() => {
-  const list = [${members.map((x) => `"${x}"`)}] as const;
-  const indexOf = (val: string) => list.findIndex(x => x === val);
-
-  return { enum: ${name}Enum, list, indexOf };
-})();`;
+      const code = `export enum ${name} { ${members.join(", ")} }
+export const ${name}List = [${members
+        .map((x) => `"${x}"`)
+        .join(", ")}] as const;`;
 
       return code;
     });
@@ -82,7 +77,7 @@ export const ${name} = (() => {
         );
       }
       enums[filename] = matches;
-      success(`'${dir}/${file.name}' contains ${matches.length} enum(s)`);
+      info(`'${dir}/${file.name}' contains ${matches.length} enum(s)`);
     } else {
       warn(`'${dir}/${file.name}' contains no enums`);
     }
@@ -107,5 +102,5 @@ for (const [k, v] of Object.entries(enums)) {
   const file = `${enumDir}/${k}.ts`;
   await Deno.writeTextFile(file, `${genHeader}${v.join("\n\n")}\n`);
 
-  success(`Wrote ${file}`);
+  success(`wrote '${file}'`);
 }
